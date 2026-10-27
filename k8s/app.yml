@@ -1,44 +1,47 @@
 
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: house-price
-
 spec:
   replicas: 2
-
   selector:
     matchLabels:
       app: house-price
-
   template:
     metadata:
       labels:
         app: house-price
-
     spec:
       containers:
+        # Streamlit application
         - name: house-price
-          image: house-price-estimator:latest
+          image: house-price-estimator:v5
           imagePullPolicy: IfNotPresent
-
           ports:
             - containerPort: 8501
+
+        # Prometheus metrics server
+        - name: metrics
+          image: house-price-estimator:v5
+          imagePullPolicy: IfNotPresent
+          command: ["python", "metrics_server.py"]
+          ports:
+            - containerPort: 8008
 
 ---
 apiVersion: v1
 kind: Service
-
 metadata:
   name: house-price
-
 spec:
   selector:
     app: house-price
-
   ports:
-    - port: 8501
+    - name: streamlit
+      port: 8501
       targetPort: 8501
-
+    - name: metrics
+      port: 8008
+      targetPort: 8008
   type: NodePort
