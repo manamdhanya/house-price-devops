@@ -1,0 +1,44 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: house-price
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: house-price
+
+  template:
+    metadata:
+      labels:
+        app: house-price
+
+    spec:
+      containers:
+        - name: house-price
+          image: house-price-estimator:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8501
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: house-price
+
+spec:
+  selector:
+    app: house-price
+
+  ports:
+    - port: 8501
+      targetPort: 8501
+
+  type: NodePort
